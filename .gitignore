@@ -1,52 +1,17 @@
-# Prerequisites
-*.d
+secrets.h
 
-# Object files
-*.o
-*.ko
-*.obj
-*.elf
+.pio
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+!.vscode/*.code-snippets
 
-# Linker output
-*.ilk
-*.map
-*.exp
+# Local History for Visual Studio Code
+.history/
 
-# Precompiled Headers
-*.gch
-*.pch
+# Built Visual Studio Code Extensions
+*.vsix
 
-# Libraries
-*.lib
-*.a
-*.la
-*.lo
 
-# Shared objects (inc. Windows DLLs)
-*.dll
-*.so
-*.so.*
-*.dylib
-
-# Executables
-*.exe
-*.out
-*.app
-*.i*86
-*.x86_64
-*.hex
-
-# Debug files
-*.dSYM/
-*.su
-*.idb
-*.pdb
-
-# Kernel Module Compile Results
-*.mod*
-*.cmd
-.tmp_versions/
-modules.order
-Module.symvers
-Mkfile.old
-dkms.conf
