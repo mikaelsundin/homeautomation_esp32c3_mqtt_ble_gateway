@@ -101,6 +101,8 @@ void setup() {
   Serial.begin(115200);
   Serial.println("boot");
 
+  Serial1.begin(9600,SERIAL_8N1,5,-1);
+
 
   while(ConnectToWiFi() != WL_CONNECTED){
      Serial.println("WiFi Connection failed");
@@ -126,6 +128,63 @@ void setup() {
 
 }
 
+//16 11 0B DF1-DF4 DF5-DF8 DF9-DF12 DF13 DF14 DF15 DF16[CS]
+
+void pm1006_fsm(uint8_t data){
+  static uint8_t buffer[20];
+  static uint8_t index=0;
+  buffer[index++] = data;
+
+  /* Check Header */
+  if(index >= 1 && buffer[0] != 0x16 ){
+    index = 0;
+  }
+
+  if(index >= 2 && buffer[1] != 0x11 ){
+    index = 0;
+  }
+
+  if(index >= 3 && buffer[2] != 0x0B ){
+    index = 0;
+  }
+
+  /* Check if we received whole package */
+  if(index >= 20){
+      uint8_t checksum=0;
+      for (uint8_t i = 0; i < 20; i++) {
+            checksum += buffer[i];
+      }
+
+      if(checksum != 0){
+        Serial.println("Invalid checksum"); 
+      }else{
+        uint16_t pm25 = (buffer[5] << 8) | buffer[6];
+
+
+        for(int i=0;i<20;i++){
+          Serial.printf("%02X ", buffer[i]);
+        }
+        Serial.println();
+        Serial.printf("PM2.5 %u\n", pm25);
+
+      }
+
+
+
+    index=0;
+  }
+
+  
+  
+
+
+
+
+
+}
+
+
+
 void loop() {
   //BleScannerTask();
 
@@ -134,6 +193,20 @@ void loop() {
     MqttConnect();
   }
 
+  //Forward chars
+  if(Serial1.available()){
+    pm1006_fsm((uint8_t)Serial1.read());
+  }
+
+  //Example of payload.
+  //16 11 0B DF1-DF4 DF5-DF8 DF9-DF12 DF13 DF14 DF15 DF16[CS]
+  //Wait for header 16 11 0B 
+  //Wait until whole packet is received
+  //Check CS
+  //Calculate PM2.5
+  //MQTT Publish PM2.5
+
+  //Implement state machine based on index.
 
 
 
