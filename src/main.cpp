@@ -13,6 +13,9 @@ String mqttPrefix = "";
 String mqttFilterPrefix = "";
 PM1006 pm1006;
 
+uint8_t MqttRetryCount = 5;
+
+
 int ConnectToWiFi(void){
   int timeout = 30;
   int status;
@@ -33,10 +36,12 @@ int ConnectToWiFi(void){
   //Print some information.
   if(status == WL_CONNECTED){
      Serial.println("Wifi ok");
-     Serial.println("IP:");
-     Serial.print(WiFi.localIP());
-     Serial.println("GW:");
-     Serial.print(WiFi.gatewayIP());
+     
+     Serial.print("IP:");
+     Serial.println(WiFi.localIP());
+     
+     Serial.print("GW:");
+     Serial.println(WiFi.gatewayIP());
   }
 
   return status;
@@ -96,7 +101,13 @@ void MqttConnect()
     mqttClient.publish(statusTopic.c_str(), "online", false);
     mqttClient.subscribe(filterTopic.c_str() , 0);
   }else{
+    MqttRetryCount--;
     Serial.println("MQTT Failed");
+
+    if(MqttRetryCount == 0){
+      Serial.println("MQTT retry count zero. Restarting board");
+      ESP.restart();
+    }   
   }
 }
 
@@ -151,7 +162,7 @@ void loop() {
 
   /* Handle MQTT */
   if(mqttClient.loop() == false){
-    MqttConnect();
+    MqttConnect();    
   }
 
   //Forward received chars to PM1006
