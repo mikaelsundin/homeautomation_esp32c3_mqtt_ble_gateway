@@ -4,14 +4,14 @@
 #include <WiFi.h>
 #include <PubSubClient.h>
 #include "secrets.h"
-
+#include "pm1006.h"
 
 WiFiClient espClient;
 PubSubClient mqttClient(espClient); 
 
 String mqttPrefix = "";
 String mqttFilterPrefix = "";
-
+PM1006 pm1006;
 
 int ConnectToWiFi(void){
   int timeout = 30;
@@ -67,6 +67,8 @@ String GetMqttClientID(){
 
 void MqttConnect()
 {
+  //TODO: limit number of retries before reset MCU...
+
   //Construct Prefix
   mqttPrefix = String(DEFAULT_MQTT_PREFIX);
   mqttPrefix.replace("%mac%", GetMqttClientID());
@@ -87,13 +89,24 @@ void MqttConnect()
 
 
   if(connected){
-    Serial.print("MQTT Connected");
+    Serial.println("MQTT Connected");
 
-    mqttClient.publish(statusTopic.c_str(), "online");
+    delay(10);
+
+    mqttClient.publish(statusTopic.c_str(), "online", false);
     mqttClient.subscribe(filterTopic.c_str() , 0);
   }else{
-    Serial.print("MQTT Failed");
+    Serial.println("MQTT Failed");
   }
+}
+
+void pm1006_callback_handler(uint16_t pm25){
+  auto pm25Topic = mqttPrefix + "/vindrikning/value";
+  char str[6];
+
+  //Publish value
+  sprintf(str, "%u", pm25);
+  mqttClient.publish(pm25Topic.c_str(), str);
 }
 
 
@@ -101,13 +114,15 @@ void setup() {
   Serial.begin(115200);
   Serial.println("boot");
 
+  //PM1006 serial port.
   Serial1.begin(9600,SERIAL_8N1,5,-1);
-
 
   while(ConnectToWiFi() != WL_CONNECTED){
      Serial.println("WiFi Connection failed");
   }
-
+  
+  //Register callback
+  pm1006.RegisterCallback(pm1006_callback_handler);
 
   /*
 
@@ -128,60 +143,6 @@ void setup() {
 
 }
 
-//16 11 0B DF1-DF4 DF5-DF8 DF9-DF12 DF13 DF14 DF15 DF16[CS]
-
-void pm1006_fsm(uint8_t data){
-  static uint8_t buffer[20];
-  static uint8_t index=0;
-  buffer[index++] = data;
-
-  /* Check Header */
-  if(index >= 1 && buffer[0] != 0x16 ){
-    index = 0;
-  }
-
-  if(index >= 2 && buffer[1] != 0x11 ){
-    index = 0;
-  }
-
-  if(index >= 3 && buffer[2] != 0x0B ){
-    index = 0;
-  }
-
-  /* Check if we received whole package */
-  if(index >= 20){
-      uint8_t checksum=0;
-      for (uint8_t i = 0; i < 20; i++) {
-            checksum += buffer[i];
-      }
-
-      if(checksum != 0){
-        Serial.println("Invalid checksum"); 
-      }else{
-        uint16_t pm25 = (buffer[5] << 8) | buffer[6];
-
-
-        for(int i=0;i<20;i++){
-          Serial.printf("%02X ", buffer[i]);
-        }
-        Serial.println();
-        Serial.printf("PM2.5 %u\n", pm25);
-
-      }
-
-
-
-    index=0;
-  }
-
-  
-  
-
-
-
-
-
-}
 
 
 
@@ -193,21 +154,8 @@ void loop() {
     MqttConnect();
   }
 
-  //Forward chars
+  //Forward received chars to PM1006
   if(Serial1.available()){
-    pm1006_fsm((uint8_t)Serial1.read());
+    pm1006.Process((uint8_t)Serial1.read());
   }
-
-  //Example of payload.
-  //16 11 0B DF1-DF4 DF5-DF8 DF9-DF12 DF13 DF14 DF15 DF16[CS]
-  //Wait for header 16 11 0B 
-  //Wait until whole packet is received
-  //Check CS
-  //Calculate PM2.5
-  //MQTT Publish PM2.5
-
-  //Implement state machine based on index.
-
-
-
 }  
