@@ -1,13 +1,15 @@
 #include <Arduino.h>
-#include "ble.h"
 #include <ArduinoJson.h>
 #include <WiFi.h>
 #include <PubSubClient.h>
 #include "secrets.h"
 #include "pm1006.h"
+#include "ble_scanner.h"
+#include "ble_whitelist.h"
 
 WiFiClient espClient;
 PubSubClient mqttClient(espClient); 
+BleAdvestingScanner *BleScanner;
 
 String mqttPrefix = "";
 String mqttFilterPrefix = "";
@@ -50,13 +52,14 @@ int ConnectToWiFi(void){
 void mqttCallback(char* cstr_topic, byte* payload, unsigned int length) 
 {
   auto topic = String(cstr_topic);
+  auto str = String(payload, length);
 
   if(topic.endsWith("/filter/add")){
-    Serial.println("Filter add");
+    BleWhitelistStorageAdd(str);
   }
 
   if(topic.endsWith("/filter/del")){
-    Serial.println("Filter del");    
+    BleWhitelistStorageDel(str);
   }
 }
 
@@ -121,6 +124,25 @@ void pm1006_callback_handler(uint16_t pm25){
 }
 
 
+/**
+ * Callback when BLE Manufacture data is received.
+ * String will contain binary data
+ */
+void BleManufactureDataCallbackHandler(char* mac, char* payload){
+  Serial.printf("ManufactureData %s\n", mac);
+  Serial.printf("payload %s\n", payload);
+
+  String adr = String(mac);
+  adr.toUpperCase();
+  adr.replace(":","");
+
+  /* Build Topic */
+  auto topic = mqttPrefix + String("/manufacturedata/") + String(adr) + String("/raw");
+
+  /* Send raw payload. */
+  mqttClient.publish(topic.c_str(), payload);
+}
+
 void setup() {
   Serial.begin(115200);
   Serial.println("boot");
@@ -132,33 +154,17 @@ void setup() {
      Serial.println("WiFi Connection failed");
   }
   
-  //Register callback
+  //PM1006 callback handler
   pm1006.RegisterCallback(pm1006_callback_handler);
 
-  /*
-
-  BleScannerInit();
-  Serial.println("BleScannerStart Done");
-
-  BleScannerWhitelistAdd("90:FD:9F:4D:60:CB");
-
-  //Example of json document
-  StaticJsonDocument<200> doc;
-
-  doc["device"] = "gps";
-  doc["rssi"] = 1351824120;
-  doc["manufactureData"] = 1351824120;
-
-  serializeJsonPretty(doc, Serial);
-  */
-
+  //Ble scanner
+  BleScanner = BleAdvestingScanner::GetInstance(); 
+  BleScanner->RegisterManufactureDataCallback(BleManufactureDataCallbackHandler);
 }
 
 
-
-
 void loop() {
-  //BleScannerTask();
+  BleScanner->Loop();
 
   /* Handle MQTT */
   if(mqttClient.loop() == false){
