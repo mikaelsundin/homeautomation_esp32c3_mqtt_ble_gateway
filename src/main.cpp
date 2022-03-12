@@ -129,9 +129,10 @@ void pm1006_callback_handler(uint16_t pm25){
  * String will contain binary data
  */
 void BleManufactureDataCallbackHandler(char* mac, char* payload){
-  Serial.printf("ManufactureData %s\n", mac);
-  Serial.printf("payload %s\n", payload);
+  //Serial.printf("ManufactureData %s\n", mac);
+  //Serial.printf("payload %s\n", payload);
 
+  //Convert MAC to Compressed MAC.
   String adr = String(mac);
   adr.toUpperCase();
   adr.replace(":","");

@@ -23,8 +23,6 @@ public:
 
     void onResult(BLEAdvertisedDevice* advertisedDevice) 
     {
-        //Serial.printf("AdvertisedDevice %s\n", advertisedDevice->toString().c_str());
-
         //Xiaomi ServiceData 
         if(advertisedDevice->haveServiceData()){
             uint8_t buffer[200];
@@ -43,6 +41,7 @@ public:
 
         }
 
+        //Other BLE with ManufacturerData
         if(advertisedDevice->haveManufacturerData()){
             uint8_t buffer[200];
             auto adr =advertisedDevice->getAddress().toString();
@@ -74,7 +73,7 @@ BleAdvestingScanner::BleAdvestingScanner(){
 void BleAdvestingScanner::WhitelistAdd(String mac){
     auto adr = NimBLEAddress(mac.c_str());
                 
-    Serial.printf("WhitelistAdd %s", mac);
+    Serial.printf("WhitelistAdd %s\n", mac);
 
     /* Update Nimble direcly if initlized */
     if(pBLEScan != nullptr){
@@ -88,7 +87,7 @@ void BleAdvestingScanner::WhitelistAdd(String mac){
 void BleAdvestingScanner::WhitelistDel(String mac){
     auto adr = NimBLEAddress(mac.c_str());
     
-    Serial.printf("WhitelistDel %s", mac);
+    Serial.printf("WhitelistDel %s\n", mac);
 
     /* Update Nimble direcly if initlized */
     if(pBLEScan != nullptr){
