@@ -7,6 +7,11 @@ Another function for this code is to forward BLE Advertising Manufacturer Data t
 
 It has also support for forward Xiaomi ServiceData, for example MiFlora. 
 
+# Build the code
+* Install VS code
+* Install Platformio
+* Run Platformio:Build
+
 ## BLE features
 To listen for BLE Advertising Manufacturer a MAC filter is implemented.
 
