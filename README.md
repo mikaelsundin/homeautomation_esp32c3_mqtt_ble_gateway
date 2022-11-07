@@ -17,6 +17,15 @@ Filter add: TOPIC: 'blegateway/GATEWAY-WIFI-MAC/filter/add' payload: '11:22:33:4
 
 Filter remove: TOPIC: 'blegateway/GATEWAY-WIFI-MAC/filter/del'  payload: '11:22:33:44:55:66'
 
+# Hardware 
+ESP32-C3 based board with pin 5 connected to PM1006 tx.
++5V can be taken from IKEA VINDRIKTNING and supply ESP32-C3 via voltage regulator.
+
+The board must be small enough to fit IKEA VINDRIKTNING. 
+
+Suggested board is Beetle ESP32-C3
+
+
 
 ## Settings
 For setup wifi password and MQTT copy exampel secrets.example.h to secrets.h and change the file.
