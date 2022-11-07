@@ -25,6 +25,8 @@ int ConnectToWiFi(void){
   Serial.print("Attempting to connect to WPA SSID: ");
   Serial.println(DEFAULT_WIFI_SSID);
 
+  Serial.printf("WIFI MAC %s\n", WiFi.macAddress().c_str());
+
   WiFi.mode(WIFI_STA);
   WiFi.setAutoConnect(true);
   WiFi.persistent(true);

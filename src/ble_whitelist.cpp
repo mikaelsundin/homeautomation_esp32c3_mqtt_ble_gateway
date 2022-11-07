@@ -42,7 +42,7 @@ void BleWhitelistStorageAdd(String device_mac){
         BLE_WHITELIST_DEBUG("BLE_Whitelist_Add nvs_commit: %s", esp_err_to_name(err));
     }
 
-    BLE_WHITELIST_DEBUG("BLE_Whitelist_Add done %s", name.c_str());
+    BLE_WHITELIST_DEBUG("BLE_Whitelist_Add done %s\n", name.c_str());
 
     nvs_close(handle);
 }
