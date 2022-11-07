@@ -7,6 +7,8 @@ Another function for this code is to forward BLE Advertising Manufacturer Data t
 
 It has also support for forward Xiaomi ServiceData, for example MiFlora. 
 
+BLE data will be coded as ascii-HEX values.
+
 ## Build the code
 * Install VS code
 * Install Platformio
