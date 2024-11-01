@@ -122,6 +122,7 @@ void MqttConnect()
 
     delay(10);
 
+    mqttClient.setKeepAlive(60);
     mqttClient.publish(statusTopic.c_str(), "online", true);
     mqttClient.subscribe(filterTopic.c_str() , 0);
   }else{
@@ -193,7 +194,7 @@ void loop() {
     MqttConnect();    
   }
 
-  //Forward received chars to PM1006
+  //Forward received chars to PM1006 processor
   if(Serial1.available()){
     pm1006.Process((uint8_t)Serial1.read());
   }
