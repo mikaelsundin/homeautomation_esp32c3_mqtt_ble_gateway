@@ -16,9 +16,19 @@
 //
 // If prefix contain %mac% this will be replaced with WiFi MAC address.
 //
-#define DEFAULT_MQTT_URI			"1.1.1.1"
+#define DEFAULT_MQTT_IP				"1.1.1.1"
+#define DEFAULT_MQTT_PORT			8883
+
 #define DEFAULT_MQTT_USER			"user"
 #define DEFAULT_MQTT_PASS			"pass"
 #define DEFAULT_MQTT_PREFIX		    "blegateway/%mac%"
+
+//control TLS settings.
+#define DEFAULT_MQTT_USE_TLS		1
+#ifdef DEFAULT_MQTT_USE_TLS
+	#include "ca.h"
+#endif
+
+
 
 #endif

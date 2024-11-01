@@ -6,8 +6,15 @@
 #include "pm1006.h"
 #include "ble_scanner.h"
 #include "ble_whitelist.h"
+#include <WiFiClientSecure.h>
 
-WiFiClient espClient;
+//Allow user to select TLS or unecrypted.
+#ifdef DEFAULT_MQTT_USE_TLS
+  WiFiClientSecure  espClient;
+#else
+  WiFiClient  espClient;
+#endif
+
 PubSubClient mqttClient(espClient); 
 BleAdvestingScanner *BleScanner;
 
@@ -18,9 +25,15 @@ PM1006 pm1006;
 uint8_t MqttRetryCount = 5;
 
 
+
+
 int ConnectToWiFi(void){
   int timeout = 30;
   int status;
+
+  
+
+
   
   Serial.print("Attempting to connect to WPA SSID: ");
   Serial.println(DEFAULT_WIFI_SSID);
@@ -78,6 +91,7 @@ String GetMqttClientID(){
 void MqttConnect()
 {
   //TODO: limit number of retries before reset MCU...
+  const char* root_ca = "";
 
   //Construct Prefix
   mqttPrefix = String(DEFAULT_MQTT_PREFIX);
@@ -86,6 +100,11 @@ void MqttConnect()
   //build Topics.
   auto statusTopic = mqttPrefix + "/status";
   auto filterTopic = mqttPrefix + "/filter/#";
+
+  //configure TLS
+#ifdef DEFAULT_MQTT_USE_TLS
+  espClient.setCACert(DEFAULT_MQTT_CA);
+#endif
 
   //Configure MQTT client
   mqttClient.setCallback(mqttCallback);
@@ -103,7 +122,7 @@ void MqttConnect()
 
     delay(10);
 
-    mqttClient.publish(statusTopic.c_str(), "online", false);
+    mqttClient.publish(statusTopic.c_str(), "online", true);
     mqttClient.subscribe(filterTopic.c_str() , 0);
   }else{
     MqttRetryCount--;
