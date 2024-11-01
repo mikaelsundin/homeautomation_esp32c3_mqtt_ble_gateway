@@ -4,7 +4,7 @@
 #include <stdint.h>
 
 #include "ble_scanner.h"
-#include "ble_whitelist.h"
+#include "ble_allowlist.h"
 
 
 /**
@@ -37,8 +37,6 @@ public:
 
                 this->callback((char*)adr.c_str(), (char*)dataptr);
             }
-
-
         }
 
         //Other BLE with ManufacturerData
@@ -70,37 +68,37 @@ BleAdvestingScanner::BleAdvestingScanner(){
 
 }
 
-void BleAdvestingScanner::WhitelistAdd(String mac){
+void BleAdvestingScanner::AllowlistAdd(String mac){
     auto adr = NimBLEAddress(mac.c_str());
                 
-    Serial.printf("WhitelistAdd %s\n", mac);
+    Serial.printf("AllowlistAdd %s\n", mac);
 
     /* Update Nimble direcly if initlized */
     if(pBLEScan != nullptr){
         NimBLEDevice::whiteListAdd(adr);
     }
 
-    BleWhitelistStorageAdd(mac);
+    BleAllowlistStorageAdd(mac);
 }
 
 
-void BleAdvestingScanner::WhitelistDel(String mac){
+void BleAdvestingScanner::AllowlistDel(String mac){
     auto adr = NimBLEAddress(mac.c_str());
     
-    Serial.printf("WhitelistDel %s\n", mac);
+    Serial.printf("AllowlistDel %s\n", mac);
 
     /* Update Nimble direcly if initlized */
     if(pBLEScan != nullptr){
         NimBLEDevice::whiteListRemove(adr);
     }
 
-    BleWhitelistStorageDel(mac);
+    BleAllowlistStorageDel(mac);
 }
 
-void WhitelistCallback(char *mac){
+void AllowlistCallback(char *mac){
     auto adr = NimBLEAddress(mac);
 
-    Serial.printf("WhitelistCallback %s\n", mac);
+    Serial.printf("AllowlistCallback %s\n", mac);
 
     NimBLEDevice::whiteListAdd(adr);
 }
@@ -138,7 +136,7 @@ void BleAdvestingScanner::Loop(){
         pBLEScan->setWindow(300);
 
         //Refresh whitelist
-        BleWhitelistStorageIterate(WhitelistCallback);
+        BleAllowlistStorageIterate(AllowlistCallback);
 
         //scan forever
         //ScanComplete

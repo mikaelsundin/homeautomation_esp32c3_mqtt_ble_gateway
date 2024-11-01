@@ -5,7 +5,7 @@
 #include "secrets.h"
 #include "pm1006.h"
 #include "ble_scanner.h"
-#include "ble_whitelist.h"
+#include "ble_allowlist.h"
 #include <WiFiClientSecure.h>
 
 //Allow user to select TLS or unecrypted.
@@ -70,11 +70,11 @@ void mqttCallback(char* cstr_topic, byte* payload, unsigned int length)
   auto str = String(payload, length);
 
   if(topic.endsWith("/filter/add")){
-    BleWhitelistStorageAdd(str);
+    BleAllowlistStorageAdd(str);
   }
 
   if(topic.endsWith("/filter/del")){
-    BleWhitelistStorageDel(str);
+    BleAllowlistStorageDel(str);
   }
 }
 

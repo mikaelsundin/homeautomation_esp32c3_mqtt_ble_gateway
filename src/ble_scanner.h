@@ -8,8 +8,8 @@ class BleAdvestingScanner
 public:
     void Loop(void);
     void RegisterManufactureDataCallback(void (*callback)(char *mac, char *payload));
-    void WhitelistAdd(String mac);
-    void WhitelistDel(String mac);
+    void AllowlistAdd(String mac);
+    void AllowlistDel(String mac);
     
     //Singleton pattern
     static BleAdvestingScanner* GetInstance() {
